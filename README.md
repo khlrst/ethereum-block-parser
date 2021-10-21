@@ -1,5 +1,5 @@
 # ethereum-block-pparser
 
-Parse ethereum transaction to OpenSea contract with "AtomicMatch" in order to find not-null arguments for static calls.
+Fetch block and look for atomicMatch function calls arguments from the OpenSea
 
 usage *go run main.go **-i** Your infura API key **-d**  block depth
