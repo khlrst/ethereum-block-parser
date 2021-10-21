@@ -83,14 +83,13 @@ func fetchBlocks(start uint64, end uint64, client *jsonrpc.Client, blocks chan *
 }
 
 func main() { // supply infura API key, depth of blocks
-	///get args
 	var infuraApiKey string
 	var depth uint64
 
 	flag.StringVar(&infuraApiKey, "i", infuraApiKey, "Specify infuraApiKey. Cannot be null")
 	flag.Uint64Var(&depth, "d", depth, "Specify depth. Cannot be 0")
-
-	flag.Parse() // after declaring flags we need to call it
+	// read args
+	flag.Parse() 
 	// get a client
 	client, err := jsonrpc.NewClient(fmt.Sprintf("https://mainnet.infura.io/v3/%s", infuraApiKey))
 	if err != nil {
