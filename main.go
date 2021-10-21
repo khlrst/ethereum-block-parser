@@ -10,38 +10,14 @@ import (
 	"github.com/umbracle/go-web3/jsonrpc"
 )
 
-type Block struct {
-	Number             uint64
-	Hash               web3.Hash
-	ParentHash         web3.Hash
-	Sha3Uncles         web3.Hash
-	TransactionsRoot   web3.Hash
-	StateRoot          web3.Hash
-	ReceiptsRoot       web3.Hash
-	Miner              web3.Address
-	Difficulty         big.Int
-	ExtraData          []byte
-	GasLimit           uint64
-	GasUsed            uint64
-	Timestamp          uint64
-	Transactions       []Transaction
-	TransactionsHashes []web3.Hash
-	Uncles             []web3.Hash
-}
-
 type Transaction struct {
 	Hash        web3.Hash
 	From        web3.Address
-	To          web3.Address
 	Input       string
 	Value       big.Int
 	Nonce       uint64
-	V           []byte
-	R           []byte
-	S           []byte
 	BlockHash   web3.Hash
 	BlockNumber uint64
-	TxnIndex    uint64
 }
 
 func ExtractOpenseaTransactions(input *web3.Block, transactions *[]Transaction) {
@@ -54,16 +30,11 @@ func ExtractOpenseaTransactions(input *web3.Block, transactions *[]Transaction) 
 					*transactions = append(*transactions, Transaction{
 						Hash:        input.Transactions[i].Hash,
 						From:        input.Transactions[i].From,
-						To:          *input.Transactions[i].To,
 						Input:       hex.EncodeToString(input.Transactions[i].Input),
 						Value:       *input.Transactions[i].Value,
 						Nonce:       input.Transactions[i].Nonce,
-						V:           input.Transactions[i].V,
-						R:           input.Transactions[i].R,
-						S:           input.Transactions[i].S,
 						BlockHash:   input.Transactions[i].BlockHash,
 						BlockNumber: input.Transactions[i].BlockNumber,
-						TxnIndex:    input.Transactions[i].TxnIndex,
 					})
 				}
 			}
@@ -89,7 +60,7 @@ func main() { // supply infura API key, depth of blocks
 	flag.StringVar(&infuraApiKey, "i", infuraApiKey, "Specify infuraApiKey. Cannot be null")
 	flag.Uint64Var(&depth, "d", depth, "Specify depth. Cannot be 0")
 	// read args
-	flag.Parse() 
+	flag.Parse()
 	// get a client
 	client, err := jsonrpc.NewClient(fmt.Sprintf("https://mainnet.infura.io/v3/%s", infuraApiKey))
 	if err != nil {
