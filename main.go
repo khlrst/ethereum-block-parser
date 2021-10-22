@@ -27,18 +27,20 @@ func ExtractOpenseaTransactions(input *web3.Block, transactions *[]Transaction) 
 			if *input.Transactions[i].To == openseaAddress {
 				selector := hex.EncodeToString(input.Transactions[i].Input[0:4])
 				if selector == "ab834bab" { //AtomicMatch selector
-					*transactions = append(*transactions, Transaction{
-						Hash:        input.Transactions[i].Hash,
-						From:        input.Transactions[i].From,
-						Input:       hex.EncodeToString(input.Transactions[i].Input),
-						Value:       *input.Transactions[i].Value,
-						Nonce:       input.Transactions[i].Nonce,
-						BlockHash:   input.Transactions[i].BlockHash,
-						BlockNumber: input.Transactions[i].BlockNumber,
-					})
+					// *transactions = append(*transactions, Transaction{
+					// 	Hash:        input.Transactions[i].Hash,
+					// 	From:        input.Transactions[i].From,
+					// 	Input:       hex.EncodeToString(input.Transactions[i].Input),
+					// 	Value:       *input.Transactions[i].Value,
+					// 	Nonce:       input.Transactions[i].Nonce,
+					// 	BlockHash:   input.Transactions[i].BlockHash,
+					// 	BlockNumber: input.Transactions[i].BlockNumber,
+					// })
+					fmt.Println("buy order static target: ", hex.EncodeToString(input.Transactions[i].Input)[328:392][24:64], "  sell order static target: ", hex.EncodeToString(input.Transactions[i].Input)[776:840][24:64])
 				}
 			}
 		}
+
 	}
 }
 
@@ -81,7 +83,7 @@ func main() { // supply infura API key, depth of blocks
 		for {
 			block, more := <-blocks
 			if more {
-				ExtractOpenseaTransactions(block, &transactions)
+				go ExtractOpenseaTransactions(block, &transactions)
 			} else {
 				return
 			}
@@ -89,7 +91,7 @@ func main() { // supply infura API key, depth of blocks
 	}()
 	fetchBlocks(start, end, client, blocks)
 	close(blocks)
-	for _, transaction := range transactions {
-		fmt.Println("buy order static target: ", transaction.Input[328:392][24:64], "  sell order static target: ", transaction.Input[776:840][24:64]) // print arguments from atomic match
-	}
+	// for _, transaction := range transactions {
+	// 	fmt.Println("buy order static target: ", transaction.Input[328:392][24:64], "  sell order static target: ", transaction.Input[776:840][24:64]) // print arguments from atomic match
+	// }
 }
