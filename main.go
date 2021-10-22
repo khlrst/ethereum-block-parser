@@ -27,7 +27,7 @@ func ExtractOpenseaTransactions(input *web3.Block, transactions *[]Transaction) 
 			if *input.Transactions[i].To == openseaAddress {
 				selector := hex.EncodeToString(input.Transactions[i].Input[0:4])
 				if selector == "ab834bab" { //AtomicMatch selector
-					// *transactions = append(*transactions, Transaction{
+					// *transactions = append(*transactions, Transaction{ // for further writes into json file
 					// 	Hash:        input.Transactions[i].Hash,
 					// 	From:        input.Transactions[i].From,
 					// 	Input:       hex.EncodeToString(input.Transactions[i].Input),
@@ -36,7 +36,7 @@ func ExtractOpenseaTransactions(input *web3.Block, transactions *[]Transaction) 
 					// 	BlockHash:   input.Transactions[i].BlockHash,
 					// 	BlockNumber: input.Transactions[i].BlockNumber,
 					// })
-					fmt.Println("buy order static target: ", hex.EncodeToString(input.Transactions[i].Input)[328:392][24:64], "  sell order static target: ", hex.EncodeToString(input.Transactions[i].Input)[776:840][24:64])
+					fmt.Println(input.Transactions[i].Hash, " buy order static target: ", hex.EncodeToString(input.Transactions[i].Input)[328:392][24:64], "  sell order static target: ", hex.EncodeToString(input.Transactions[i].Input)[776:840][24:64])
 				}
 			}
 		}
@@ -91,7 +91,4 @@ func main() { // supply infura API key, depth of blocks
 	}()
 	fetchBlocks(start, end, client, blocks)
 	close(blocks)
-	// for _, transaction := range transactions {
-	// 	fmt.Println("buy order static target: ", transaction.Input[328:392][24:64], "  sell order static target: ", transaction.Input[776:840][24:64]) // print arguments from atomic match
-	// }
 }
