@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"math/big"
 
 	web3 "github.com/umbracle/go-web3"
@@ -20,27 +22,29 @@ type Transaction struct {
 	BlockNumber uint64
 }
 
-func ExtractOpenseaTransactions(input *web3.Block, transactions *[]Transaction) {
+type Output struct {
+	Hash     web3.Hash `json: "hash"`
+	RootBuy  string    `json: "rootBuy"`
+	RootSell string    `json: "rootSell"`
+}
+
+func ExtractOpenseaTransactions(input *web3.Block, transactions *[]Transaction, outputs *[]Output) {
 	openseaAddress := web3.HexToAddress("0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b")
+
 	for i := 0; i < len(input.Transactions); i++ {
 		if input.Transactions[i].To != nil && len(input.Transactions[i].Input) > 0 {
 			if *input.Transactions[i].To == openseaAddress {
 				selector := hex.EncodeToString(input.Transactions[i].Input[0:4])
-				if selector == "ab834bab" { //AtomicMatch selector
-					// *transactions = append(*transactions, Transaction{ // for further writes into json file
-					// 	Hash:        input.Transactions[i].Hash,
-					// 	From:        input.Transactions[i].From,
-					// 	Input:       hex.EncodeToString(input.Transactions[i].Input),
-					// 	Value:       *input.Transactions[i].Value,
-					// 	Nonce:       input.Transactions[i].Nonce,
-					// 	BlockHash:   input.Transactions[i].BlockHash,
-					// 	BlockNumber: input.Transactions[i].BlockNumber,
-					// })
-					fmt.Println(input.Transactions[i].Hash, " buy order static target: ", hex.EncodeToString(input.Transactions[i].Input)[328:392][24:64], "  sell order static target: ", hex.EncodeToString(input.Transactions[i].Input)[776:840][24:64])
+				if selector == "ab834bab" && hex.EncodeToString(input.Transactions[i].Input)[3464:3472] == "fb16a595" { //AtomicMatch selector and merkle validator selector
+					*outputs = append(*outputs, Output{
+						Hash:     input.Transactions[i].Hash,
+						RootBuy:  hex.EncodeToString(input.Transactions[i].Input)[3728:3792],
+						RootSell: hex.EncodeToString(input.Transactions[i].Input)[4304:4368],
+					})
+					// fmt.Println(input.Transactions[i].Hash, " buy root hash: ", hex.EncodeToString(input.Transactions[i].Input)[3728:3792], "  sell root hash: ", hex.EncodeToString(input.Transactions[i].Input)[4304:4368])
 				}
 			}
 		}
-
 	}
 }
 
@@ -79,11 +83,13 @@ func main() { // supply infura API key, depth of blocks
 	blocks := make(chan *web3.Block, 1)
 	// create transaction storage slice
 	transactions := make([]Transaction, 0)
+	// create array of outputs
+	outputs := make([]Output, 0)
 	go func() {
 		for {
 			block, more := <-blocks
 			if more {
-				go ExtractOpenseaTransactions(block, &transactions)
+				go ExtractOpenseaTransactions(block, &transactions, &outputs)
 			} else {
 				return
 			}
@@ -91,4 +97,6 @@ func main() { // supply infura API key, depth of blocks
 	}()
 	fetchBlocks(start, end, client, blocks)
 	close(blocks)
+	blob, _ := json.Marshal(outputs)
+	ioutil.WriteFile("output.json", blob, 0644)
 }
