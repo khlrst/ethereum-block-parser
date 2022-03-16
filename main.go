@@ -29,7 +29,7 @@ type Output struct {
 }
 
 func ExtractOpenseaTransactions(input *web3.Block, transactions *[]Transaction, outputs *[]Output) {
-	openseaAddress := web3.HexToAddress("0x7Be8076f4EA4A4AD08075C2508e481d6C946D12b")
+	openseaAddress := web3.HexToAddress("0x7f268357A8c2552623316e2562D90e642bB538E5")
 
 	for i := 0; i < len(input.Transactions); i++ {
 		if input.Transactions[i].To != nil && len(input.Transactions[i].Input) > 0 {
@@ -41,7 +41,7 @@ func ExtractOpenseaTransactions(input *web3.Block, transactions *[]Transaction, 
 						RootBuy:  hex.EncodeToString(input.Transactions[i].Input)[3728:3792],
 						RootSell: hex.EncodeToString(input.Transactions[i].Input)[4304:4368],
 					})
-					// fmt.Println(input.Transactions[i].Hash, " buy root hash: ", hex.EncodeToString(input.Transactions[i].Input)[3728:3792], "  sell root hash: ", hex.EncodeToString(input.Transactions[i].Input)[4304:4368])
+					fmt.Println(input.Transactions[i].Hash, " buy root hash: ", hex.EncodeToString(input.Transactions[i].Input)[3728:3792], "  sell root hash: ", hex.EncodeToString(input.Transactions[i].Input)[4304:4368])
 				}
 			}
 		}
